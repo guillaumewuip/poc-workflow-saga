@@ -1,0 +1,12 @@
+{
+  "name": "poc-workflow-saga",
+  "version": "0.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:guillaumewuip/poc-workflow-saga.git",
+  "author": "Guillaume Clochard <guillaume.clochard@iadvize.com>",
+  "license": ".",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ]
+}
