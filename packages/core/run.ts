@@ -1,9 +1,9 @@
-import { Effect, EffectBundle } from '../effect/Effect';
+import { Effect, EffectClass } from './Effect';
 
 export function run<E extends Effect, Return>(
   context: {},
   process: () => Generator<E, Return, unknown>,
-  runners: EffectBundle<E>[]
+  runners: EffectClass<E>[]
 ) {
   const iterator = process();
 
@@ -13,20 +13,14 @@ export function run<E extends Effect, Return>(
     console.log(effect);
 
     if (effect.done) {
-
+      // ?
     } else {
-      const validRunners = runners.filter(
-        (runner) => runner.name === effect.value.name,
-      );
-
-      console.log({ runners, validRunners });
-
-      if (validRunners.length) {
-        validRunners[0].run(effect.value, context, nextEffect);
-      }
+      runners.forEach((runner) => {
+        if (runner.filter(effect.value)) {
+          runner.run(effect.value, context, nextEffect);
+        }
+      });
     }
-
-
   }
 
   nextEffect(undefined);

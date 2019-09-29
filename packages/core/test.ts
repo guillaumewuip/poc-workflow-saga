@@ -1,15 +1,17 @@
-import { totoBundle, TotoEffect } from '../effect/Effect';
+import { delay, DelayEffect, delayClass } from '../effects/delay';
 
 import { run } from './run';
 
-function* test(): Generator<TotoEffect, void, unknown> {
-  yield totoBundle.create();
+function* test(): Generator<DelayEffect, void, unknown> {
+  yield delay(1000);
+  yield delay(2000);
+  yield delay(4000);
 }
 
 run(
   {},
   test,
   [
-    totoBundle,
+    delayClass,
   ],
 );
