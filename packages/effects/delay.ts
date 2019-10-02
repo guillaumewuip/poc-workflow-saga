@@ -1,41 +1,61 @@
-import {Effect, EffectCreator, EffectRunner, EffectClass} from '../core/Effect';
+import {
+  EffectRunResult,
+  createEffectRunValue,
+} from '../core/EffectClass';
 
-const NAME: 'DELAY' = 'DELAY';
+import {
+  Context,
+} from '../core/context';
 
-export type DelayEffect = Effect & {
-  _return: string,
-  name: typeof NAME,
-  ms: number
+import {
+  Effect,
+  Effects,
+} from '../core/Effect';
+
+export const NAME = 'Delay';
+
+export type DelayEffect = Effect<typeof NAME> & {
+  readonly delay: number;
+}
+
+declare module '../core/Effect' {
+  interface EffectNameToEffect {
+    Option: DelayEffect;
+  }
+}
+
+export function isDelayEffect(anyEffect: Effects): anyEffect is DelayEffect {
+  return anyEffect._NAME === NAME;
 };
 
-const create: EffectCreator<DelayEffect> = (ms: number) => ({
-  name: NAME,
-  ms,
-}) as DelayEffect;
+function create(ms: number): DelayEffect {
+  return {
+    _NAME: NAME,
+    delay: ms,
+  };
+}
 
-const filter = (anyEffect: Effect): anyEffect is DelayEffect => {
-  return anyEffect.name === NAME;
-};
+export function run(
+  effect: DelayEffect,
+  _: Context,
+  next: (result: EffectRunResult) => void,
+) {
+  if (!isDelayEffect(effect)) {
+    return;
+  }
 
-const run: EffectRunner<DelayEffect> = (
-  effect,
-  _: {},
-  next,
-) => {
   const {
-    ms,
+    delay: ms,
   } = effect;
 
   setTimeout(() => {
-    next(ms);
+    next(createEffectRunValue(ms));
   }, ms);
 }
 
-export const delayClass: EffectClass<DelayEffect> = {
-  NAME,
-  create,
-  filter,
-  run,
-};
+export function* delay(ms: number) {
+  const result = yield create(ms);
 
-export const delay = create;
+  // we are sure this is a number
+  return result as number;
+};

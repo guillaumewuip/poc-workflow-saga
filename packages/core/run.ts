@@ -1,30 +1,27 @@
-import { Effect, EffectClass } from './Effect';
+import { AnyEffectClass, createEffectRunValue } from './EffectClass';
 
-export function run<E extends Effect, Return>(
-  context: {},
-  process: () => Generator<E, Return, unknown>,
-  runners: EffectClass<E>[]
+import { buildNextEffectRunner } from './runEffect';
+import { Context } from './context';
+import { Process } from './Process';
+
+export function run<EffectClasses extends AnyEffectClass[]>(
+  runners: EffectClasses,
 ) {
-  const iterator = process();
+  return function(
+    _: {},
+    process: () => Process,
+  ) {
+    const generator = process();
 
-  function nextEffect(arg: any) {
-    const effect = iterator.next(arg);
+    const runNextEffect = buildNextEffectRunner<unknown>(runners);
 
-    console.log(effect);
+    const context: Context = {
+      runEffect: runNextEffect,
+    };
 
-    if (effect.done) {
-      // ?
-    } else {
-      runners.forEach((runner) => {
-        if (runner.filter(effect.value)) {
-          runner.run(effect.value, context, nextEffect);
-        }
-      });
-    }
+    runNextEffect(context, generator, createEffectRunValue(undefined));
+
+    const task = {};
+    return task;
   }
-
-  nextEffect(undefined);
-
-  const task = {};
-  return task;
-}
+};
