@@ -8,7 +8,10 @@ function* test(): Process {
   const delayResult = yield* delay(1000);
   console.log({ delayResult });
 
-  yield* call(console.log, { inCall: 'hello' });
+  yield* call((a: object) => {
+    console.log(a);
+    return a;
+  }, { inCall: 'hello' });
 
   try {
     yield* call(() => {
@@ -18,11 +21,14 @@ function* test(): Process {
     console.error({ inCallError: error });
   }
 
-  const promiseCallResult = yield* call(() => new Promise((resolve) => {
+  const promiseCallResult = yield* call((n: number, b: string) => new Promise<{n: number, b: string}>((resolve) => {
     setTimeout(() => {
-      resolve(1234);
+      resolve({
+        n,
+        b
+      });
     }, 1000);
-  }));
+  }), 1234, 'aaaa');
 
   console.log({ promiseCallResult });
 
@@ -35,6 +41,14 @@ function* test(): Process {
   } catch (error) {
     console.error({ promiseCallError: error });
   }
+
+  const result = yield* call(function* () {
+    yield* delay(1000);
+
+    return 'hello';
+  });
+
+  console.log('hello ?', { result });
 }
 
 run([

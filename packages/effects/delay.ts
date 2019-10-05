@@ -20,7 +20,7 @@ export type DelayEffect = Effect<typeof NAME> & {
 
 declare module '../core/Effect' {
   interface EffectNameToEffect {
-    Option: DelayEffect;
+    Delay: DelayEffect;
   }
 }
 

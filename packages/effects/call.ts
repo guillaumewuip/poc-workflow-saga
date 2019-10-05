@@ -1,3 +1,5 @@
+import { right } from 'fp-ts/lib/Either';
+
 import {
   Effect,
   Effects,
@@ -60,9 +62,16 @@ function runPromise(
 function runGenerator(
   generator: Generator<Effects, unknown, unknown>,
   context: Context,
-  _: (result: EffectRunResult) => void,
+  next: (result: EffectRunResult) => void,
 ) {
-  context.runEffect(context, generator, createEffectRunValue(undefined));
+  context.runEffect(
+    context,
+    generator,
+    createEffectRunValue(undefined),
+    (result) => {
+      next(right({ value: result }));
+    },
+  );
 }
 
 export function run(
@@ -90,9 +99,29 @@ export function run(
   }
 }
 
+type PromiseResult<P> = P extends Promise<infer U> ? U : any;
+type GeneratorResult<G> = G extends Generator<any, infer U, any> ? U : any;
+
+// fn returns promise
+export function call<
+  Fn extends (...args: any[]) => Promise<any>,
+>(
+  fn: Fn,
+  ...args: Parameters<Fn>
+): Generator<Effects, PromiseResult<ReturnType<Fn>>, unknown>;
+
+// fn returns generator
+export function call<
+  Fn extends (...args: any[]) => Generator<Effects, any, unknown>
+>(fn: Fn, ...args: Parameters<Fn>): Generator<Effects, GeneratorResult<ReturnType<Fn>>, unknown>;
+
+// fn is a normal function
+export function call<
+  Fn extends (...args: any[]) => any
+>(fn: Fn, ...args: Parameters<Fn>): Generator<Effects, ReturnType<Fn>, unknown>;
+
 export function* call<Fn extends (...args: any[]) => any>(fn: Fn, ...args: Parameters<Fn>) {
   const result = yield create(fn, ...args);
 
-  // we are sure result is ReturnType<Fn>
-  return result as ReturnType<Fn>;
+  return result;
 }

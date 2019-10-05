@@ -11,13 +11,14 @@ import { AnyEffectClass, EffectRunResult}   from './EffectClass';
 
 import { Effects } from './Effect';
 
-export function buildNextEffectRunner<Return>(
+export function buildNextEffectRunner(
   runners: AnyEffectClass[],
 ) {
-  return function runNextEffect(
+  return function runNextEffect<Return>(
     context: Context,
     generator: Generator<Effects, Return, unknown>,
     effectResult: EffectRunResult,
+    onDone: (result: Return) => void,
   ) {
     const result = pipe(
       effectResult,
@@ -28,7 +29,7 @@ export function buildNextEffectRunner<Return>(
     );
 
     if (result.done) {
-      // TODO ?
+      onDone(result.value);
     } else {
       const effect = result.value;
       const maybeRunner = findFirst((effectClass: AnyEffectClass) => effectClass.is(effect))(runners);
@@ -43,7 +44,7 @@ export function buildNextEffectRunner<Return>(
             runner.run(
               effect,
               context,
-              (result: EffectRunResult) => runNextEffect(context, generator, result),
+              (result: EffectRunResult) => runNextEffect(context, generator, result, onDone),
             );
           },
         ),

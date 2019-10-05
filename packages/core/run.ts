@@ -13,13 +13,13 @@ export function run<EffectClasses extends AnyEffectClass[]>(
   ) {
     const generator = process();
 
-    const runNextEffect = buildNextEffectRunner<unknown>(runners);
+    const runNextEffect = buildNextEffectRunner(runners);
 
     const context: Context = {
       runEffect: runNextEffect,
     };
 
-    runNextEffect(context, generator, createEffectRunValue(undefined));
+    runNextEffect(context, generator, createEffectRunValue(undefined), () => {});
 
     const task = {};
     return task;
