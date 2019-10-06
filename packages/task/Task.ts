@@ -125,11 +125,31 @@ export function setDoneIfChildrenAreDone<R>(task: RunningTask): RunningTask | Do
 export function addChild(child: RunningTask) {
   return function(task: RunningTask) {
     child._eventEmitter.on('done', () => {
+      // remove from children
       setDoneIfChildrenAreDone(task);
+    });
+
+    child._eventEmitter.on('cancelled', () => {
+      // remove from children
     });
 
     task._children = snoc(task._children, child);
 
     return task;
   }
+}
+
+export function done<R>(result: R) {
+  return function(task: RunningTask): DoneTask<R> {
+    const $task = task as unknown as DoneTask<R>;
+    $task._result = result;
+
+    $task._eventEmitter.emit('done');
+
+    return $task;
+  }
+}
+
+export function result<R>(task: DoneTask<R>) {
+  return task._result;
 }

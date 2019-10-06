@@ -1,6 +1,10 @@
 import { Effects } from './Effect';
 import { EffectRunResult } from './EffectClass';
 
+import {
+  Task
+} from '../task/Task';
+
 export type RunEffect = <R>(
   context: Context,
   generator: Generator<Effects, R, unknown>,
@@ -9,6 +13,8 @@ export type RunEffect = <R>(
 ) => void;
 
 export type Context = {
-  runEffect: RunEffect,
+  readonly runEffect: RunEffect,
+  readonly rootTask: Task<unknown>,
+  readonly currentTask: Task<unknown>,
 };
 

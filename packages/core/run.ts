@@ -4,6 +4,8 @@ import { buildNextEffectRunner } from './runEffect';
 import { Context } from './context';
 import { Process } from './Process';
 
+import { createTask } from '../task/Task';
+
 export function run<EffectClasses extends AnyEffectClass[]>(
   runners: EffectClasses,
 ) {
@@ -15,13 +17,21 @@ export function run<EffectClasses extends AnyEffectClass[]>(
 
     const runNextEffect = buildNextEffectRunner(runners);
 
+    const task = createTask();
     const context: Context = {
       runEffect: runNextEffect,
+      rootTask: task,
+      currentTask: task,
     };
 
-    runNextEffect(context, generator, createEffectRunValue(undefined), () => {});
+    try {
+      runNextEffect(context, generator, createEffectRunValue(undefined), () => {});
+    } catch (error) {
+      console.error(error);
+      // abort task
+      throw error;
+    }
 
-    const task = {};
     return task;
   }
 };
