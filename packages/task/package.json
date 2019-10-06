@@ -4,7 +4,8 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
-    "fp-ts": "^2.0.5",
+    "eventemitter3": "^4.0.0",
+    "fp-ts": "^2.1.0",
     "typescript": "^3.6.3"
   }
 }

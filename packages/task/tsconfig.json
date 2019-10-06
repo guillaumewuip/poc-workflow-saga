@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "target": "ES5",
+    "jsx": "react",
+    "module": "commonjs",
+    "moduleResolution": "Node",
+    "noEmitOnError": true,
+    "esModuleInterop": true,
+    "strict": true,
+    "sourceMap": true,
+    "allowSyntheticDefaultImports": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "downlevelIteration": true,
+    "forceConsistentCasingInFileNames": true,
+    "suppressExcessPropertyErrors": false,
+    "lib": [
+      "dom",
+      "es2017",
+      "esnext.asynciterable"
+    ]
+  },
+  "exclude": [
+    "node_modules"
+  ]
+}
+
