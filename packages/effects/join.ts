@@ -14,6 +14,7 @@ import {
 import {
   EffectRunResult,
   createEffectRunValue,
+  createEffectRunError,
 } from '../core/EffectClass';
 
 import {
@@ -73,9 +74,12 @@ export function run(
 
   const tasksDoneStatus: NonEmptyArray<Option<unknown>> = pipe(
     fromArray(tasks),
+    // @ts-ignore
     foldOption(
       () => {
-        throw new Error('Join need at least one task');
+        const error = new Error('Join need at least one task');
+        console.log(error);
+        next(createEffectRunError(error));
       },
       identity,
     ),
@@ -91,16 +95,22 @@ export function run(
         maybeResult,
         foldOption(
           () => {
-            throw new Error('All tasks should be done at that point');
+            const error = new Error('All tasks should be done at that point');
+        console.log(error);
+            next(createEffectRunError(error));
           },
           identity,
         ),
       );
 
+      console.log({ results });
+
       // all task are done, we can terminate effect and return tasks results
       next(createEffectRunValue(results));
     }
   }
+
+  console.log({ tasks });
 
   const taskListeners = pipe(
     tasks,
@@ -120,15 +130,21 @@ export function run(
             fold(
               cancel,
               identity,
+              // @ts-ignore
               () => {
-                throw new Error('Should not have to cancel aborted currentTask');
+                // const e = new Error('Should not have to cancel aborted currentTask');
+                console.log('qfdsjwfhj');
+                return;
               },
               () => {
-                throw new Error('Should not have to cancel done currentTask');
+                // const e = new Error('Should not have to cancel done currentTask');
+                console.log('qwfhj');
+                return;
               },
             ),
           );
         });
+        console.log({ i, task });
       }
     ),
   );
@@ -136,6 +152,8 @@ export function run(
   const arrayToIO = sequenceT(io);
   const taskListener = arrayToIO(...taskListeners as [IO<unknown>]);
   taskListener();
+
+  console.log('end join');
 }
 
 export function join<A>(tasks: [Task<A>]): Generator<Effects, [A], unknown>;

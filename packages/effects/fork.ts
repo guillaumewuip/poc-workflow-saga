@@ -58,7 +58,6 @@ function runGenerator(
     generator,
     createEffectRunValue(undefined),
     (result: unknown) => {
-      console.log('doooooone', { result });
       pipe(
         task,
         fold<Task<unknown>, unknown>(

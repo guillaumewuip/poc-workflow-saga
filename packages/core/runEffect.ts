@@ -10,6 +10,7 @@ import {
 import { AnyEffectClass, EffectRunResult}   from './EffectClass';
 
 import { Effects } from './Effect';
+import {isCancelled, isAborted} from '../task/Task';
 
 export function buildNextEffectRunner(
   runners: AnyEffectClass[],
@@ -20,6 +21,22 @@ export function buildNextEffectRunner(
     effectResult: EffectRunResult,
     onDone: (result: Return) => void,
   ) {
+    console.log({ effectResult });
+    const {
+      currentTask,
+    } = context;
+
+    // if current task is cancelled or aborted
+    if (isCancelled(currentTask) || isAborted(currentTask)) {
+      console.log('cancelled', { currentTask });
+      // this will jump in the finaly block of the generator
+      if (generator.return) {
+        generator.return({} as Return);
+      }
+
+      return;
+    }
+
     const result = pipe(
       effectResult,
       foldEither(
