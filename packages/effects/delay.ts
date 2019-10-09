@@ -9,7 +9,6 @@ import {
 
 import {
   Effect,
-  Effects,
 } from '../core/Effect';
 
 export const NAME = 'Delay';
@@ -18,13 +17,13 @@ export type DelayEffect = Effect<typeof NAME> & {
   readonly delay: number;
 }
 
-declare module '../core/Effect' {
-  interface EffectNameToEffect {
-    Delay: DelayEffect;
-  }
-}
+// declare module '../core/Effect' {
+//   interface EffectNameToEffect {
+//     Delay: DelayEffect;
+//   }
+// }
 
-export function isDelayEffect(anyEffect: Effects): anyEffect is DelayEffect {
+export function isDelayEffect(anyEffect: Effect): anyEffect is DelayEffect {
   return anyEffect._NAME === NAME;
 };
 

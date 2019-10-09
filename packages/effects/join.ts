@@ -9,7 +9,6 @@ import * as TTask from 'fp-ts/lib/Task';
 
 import {
   Effect,
-  Effects,
 } from '../core/Effect';
 
 import {
@@ -35,13 +34,13 @@ export type JoinEffect = Effect<typeof NAME> & {
   tasks: RunningOrDoneTask<unknown>[],
 };
 
-declare module '../core/Effect' {
-  interface EffectNameToEffect {
-    Join: JoinEffect;
-  }
-}
+// declare module '../core/Effect' {
+//   interface EffectNameToEffect {
+//     Join: JoinEffect;
+//   }
+// }
 
-export function isJoinEffect(anyEffect: Effects): anyEffect is JoinEffect {
+export function isJoinEffect(anyEffect: Effect): anyEffect is JoinEffect {
   return anyEffect._NAME === NAME;
 };
 
@@ -160,10 +159,10 @@ export function run(
 
 type RunningOrDoneTask<A> = RunningTask | DoneTask<A>;
 
-export function join<A>(tasks: [RunningOrDoneTask<A>]): Generator<Effects, [A], unknown>;
-export function join<A, B>(tasks: [RunningOrDoneTask<A>, RunningOrDoneTask<B>]): Generator<Effects, [A, B], unknown>;
-export function join<A, B, C>(tasks: [RunningOrDoneTask<A>, RunningOrDoneTask<B>, RunningOrDoneTask<C>]): Generator<Effects, [A, B, C], unknown>;
-export function join<A, B, C, D>(tasks: [RunningOrDoneTask<A>, RunningOrDoneTask<B>, RunningOrDoneTask<C>, RunningOrDoneTask<D>]): Generator<Effects, [A, B, C, D], unknown>;
+export function join<A>(tasks: [RunningOrDoneTask<A>]): Generator<JoinEffect, [A], unknown>;
+export function join<A, B>(tasks: [RunningOrDoneTask<A>, RunningOrDoneTask<B>]): Generator<JoinEffect, [A, B], unknown>;
+export function join<A, B, C>(tasks: [RunningOrDoneTask<A>, RunningOrDoneTask<B>, RunningOrDoneTask<C>]): Generator<JoinEffect, [A, B, C], unknown>;
+export function join<A, B, C, D>(tasks: [RunningOrDoneTask<A>, RunningOrDoneTask<B>, RunningOrDoneTask<C>, RunningOrDoneTask<D>]): Generator<JoinEffect, [A, B, C, D], unknown>;
 
 export function* join(tasks: RunningOrDoneTask<unknown>[]) {
   const result = yield create(tasks);

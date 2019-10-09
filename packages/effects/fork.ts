@@ -3,7 +3,6 @@ import {identity} from 'fp-ts/lib/function';
 
 import {
   Effect,
-  Effects,
 } from '../core/Effect';
 
 import {
@@ -25,22 +24,22 @@ import { Context } from '../core/context';
 export const NAME: 'FORK' = 'FORK';
 
 export type ForkEffect = Effect<typeof NAME> & {
-  fn: (...args: any[]) => Generator<Effects, unknown, unknown>,
+  fn: (...args: any[]) => Generator<Effect, unknown, unknown>,
   args: any[],
 };
 
-declare module '../core/Effect' {
-  interface EffectNameToEffect {
-    Fork: ForkEffect;
-  }
-}
+// declare module '../core/Effect' {
+//   interface EffectNameToEffect {
+//     Fork: ForkEffect;
+//   }
+// }
 
-export function isForkEffect(anyEffect: Effects): anyEffect is ForkEffect {
+export function isForkEffect(anyEffect: Effect): anyEffect is ForkEffect {
   return anyEffect._NAME === NAME;
 };
 
 function create<
-  Fn extends (...args: any[]) => Generator<Effects, unknown, unknown>
+  Fn extends (...args: any[]) => Generator<Effect, unknown, unknown>
 >(fn: Fn, ...args: Parameters<Fn>): ForkEffect {
   return {
     _NAME: NAME,
@@ -49,7 +48,7 @@ function create<
   };
 }
 function runGenerator(
-  generator: Generator<Effects, unknown, unknown>,
+  generator: Generator<Effect, unknown, unknown>,
   context: Context,
   task: Task<unknown>,
 ) {
@@ -123,7 +122,7 @@ export function run(
 type GeneratorResult<G> = G extends Generator<any, infer U, any> ? U : any;
 
 export function* fork<
-  Fn extends (...args: any[]) => Generator<Effects, unknown, unknown>
+  Fn extends (...args: any[]) => Generator<ForkEffect, unknown, unknown>
 >(fn: Fn, ...args: Parameters<Fn>) {
   const result = yield create(fn, ...args);
 

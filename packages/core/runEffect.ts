@@ -3,21 +3,23 @@ import { fold as foldEither } from 'fp-ts/lib/Either';
 import { findFirst } from 'fp-ts/lib/Array';
 import { fold as foldOption } from 'fp-ts/lib/Option';
 
+import { isCancelled, isAborted } from '../task/Task';
+
 import {
   Context,
 } from './context';
 
 import { AnyEffectClass, EffectRunResult}   from './EffectClass';
 
-import { Effects } from './Effect';
-import {isCancelled, isAborted} from '../task/Task';
+import { Effect } from './Effect';
 
-export function buildNextEffectRunner(
+export function buildNextEffectRunner<Env extends {}>(
   runners: AnyEffectClass[],
+  env: Env
 ) {
   return function runNextEffect<Return>(
     context: Context,
-    generator: Generator<Effects, Return, unknown>,
+    generator: Generator<Effect, Return, unknown>,
     effectResult: EffectRunResult,
     onDone: (result: Return) => void,
   ) {
@@ -61,6 +63,7 @@ export function buildNextEffectRunner(
             runner.run(
               effect,
               context,
+              env,
               (result: EffectRunResult) => runNextEffect(context, generator, result, onDone),
             );
           },

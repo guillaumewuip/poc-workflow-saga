@@ -4,7 +4,6 @@ import { identity } from 'fp-ts/lib/function';
 
 import {
   Effect,
-  Effects,
 } from '../core/Effect';
 
 import {
@@ -26,13 +25,13 @@ export type CancelEffect = Effect<typeof NAME> & {
   tasks: Task<unknown>[],
 };
 
-declare module '../core/Effect' {
-  interface EffectNameToEffect {
-    Cancel: CancelEffect;
-  }
-}
+// declare module '../core/Effect' {
+//   interface EffectNameToEffect {
+//     Cancel: CancelEffect;
+//   }
+// }
 
-export function isCancelEffect(anyEffect: Effects): anyEffect is CancelEffect {
+export function isCancelEffect(anyEffect: Effect): anyEffect is CancelEffect {
   return anyEffect._NAME === NAME;
 };
 

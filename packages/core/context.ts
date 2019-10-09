@@ -1,4 +1,4 @@
-import { Effects } from './Effect';
+import { Effect } from './Effect';
 import { EffectRunResult } from './EffectClass';
 
 import {
@@ -7,7 +7,7 @@ import {
 
 export type RunEffect = <R>(
   context: Context,
-  generator: Generator<Effects, R, unknown>,
+  generator: Generator<Effect, R, unknown>,
   effectResult: EffectRunResult,
   onDone: (result: R) => void,
 ) => void;

@@ -1,4 +1,4 @@
-export interface Effect<NAME extends string> {
+export interface Effect<NAME extends string = string> {
   readonly _NAME: NAME;
 }
 

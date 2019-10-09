@@ -2,7 +2,6 @@ import { right } from 'fp-ts/lib/Either';
 
 import {
   Effect,
-  Effects,
 } from '../core/Effect';
 
 import {
@@ -17,7 +16,7 @@ const isPromise = (something: any): something is Promise<unknown> => {
   return something && typeof something.then === 'function';
 }
 
-const isGenerator = (something: any): something is Generator<Effects, unknown, unknown> => {
+const isGenerator = (something: any): something is Generator<Effect, unknown, unknown> => {
   return something && typeof something.next === 'function' && typeof something.throw === 'function';
 };
 
@@ -28,13 +27,13 @@ export type CallEffect = Effect<typeof NAME> & {
   args: any[],
 };
 
-declare module '../core/Effect' {
-  interface EffectNameToEffect {
-    Call: CallEffect;
-  }
-}
+// declare module '../core/Effect' {
+//   interface EffectNameToEffect {
+//     Call: CallEffect;
+//   }
+// }
 
-export function isCallEffect(anyEffect: Effects): anyEffect is CallEffect {
+export function isCallEffect(anyEffect: Effect): anyEffect is CallEffect {
   return anyEffect._NAME === NAME;
 };
 
@@ -60,7 +59,7 @@ function runPromise(
 }
 
 function runGenerator(
-  generator: Generator<Effects, unknown, unknown>,
+  generator: Generator<Effect, unknown, unknown>,
   context: Context,
   next: (result: EffectRunResult) => void,
 ) {
@@ -108,17 +107,17 @@ export function call<
 >(
   fn: Fn,
   ...args: Parameters<Fn>
-): Generator<Effects, PromiseResult<ReturnType<Fn>>, unknown>;
+): Generator<CallEffect, PromiseResult<ReturnType<Fn>>, unknown>;
 
 // fn returns generator
 export function call<
-  Fn extends (...args: any[]) => Generator<Effects, any, unknown>
->(fn: Fn, ...args: Parameters<Fn>): Generator<Effects, GeneratorResult<ReturnType<Fn>>, unknown>;
+  Fn extends (...args: any[]) => Generator<CallEffect, any, unknown>
+>(fn: Fn, ...args: Parameters<Fn>): Generator<CallEffect, GeneratorResult<ReturnType<Fn>>, unknown>;
 
 // fn is a normal function
 export function call<
   Fn extends (...args: any[]) => any
->(fn: Fn, ...args: Parameters<Fn>): Generator<Effects, ReturnType<Fn>, unknown>;
+>(fn: Fn, ...args: Parameters<Fn>): Generator<CallEffect, ReturnType<Fn>, unknown>;
 
 export function* call<Fn extends (...args: any[]) => any>(fn: Fn, ...args: Parameters<Fn>) {
   const result = yield create(fn, ...args);

@@ -1,24 +1,25 @@
 import {pipe} from 'fp-ts/lib/pipeable';
 import {identity} from 'fp-ts/lib/function';
 
-import { AnyEffectClass, createEffectRunValue } from './EffectClass';
+import { AnyEffectClass, createEffectRunValue, EffectFromClasses, EnvFromClasses } from './EffectClass';
 
 import { buildNextEffectRunner } from './runEffect';
 import { Context } from './context';
-import { Process } from './Process';
 
 import { createTask, fold, done, Task } from '../task/Task';
 
-export function run<EffectClasses extends AnyEffectClass[]>(
+export function run<
+  EffectClasses extends AnyEffectClass[],
+>(
   runners: EffectClasses,
 ) {
   return function(
-    _: {},
-    process: () => Process,
+    env: EnvFromClasses<EffectClasses>,
+    process: () => Generator<EffectFromClasses<EffectClasses>, unknown, unknown>,
   ) {
     const generator = process();
 
-    const runNextEffect = buildNextEffectRunner(runners);
+    const runNextEffect = buildNextEffectRunner<EnvFromClasses<EffectClasses>>(runners, env);
 
     const task = createTask();
     const context: Context = {

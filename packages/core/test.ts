@@ -1,15 +1,13 @@
-import { delay, isDelayEffect, run as runDelayEffect } from '../effects/delay';
-import { call, isCallEffect, run as runCallEffect } from '../effects/call';
-import { fork, isForkEffect, run as runForkEffect } from '../effects/fork';
-import { join, isJoinEffect, run as runJoinEffect } from '../effects/join';
-import { isCancelEffect, run as runCancelEffect } from '../effects/cancel';
+import { DelayEffect, delay, isDelayEffect, run as runDelayEffect } from '../effects/delay';
+import { CallEffect, call, isCallEffect, run as runCallEffect } from '../effects/call';
+import { ForkEffect, fork, isForkEffect, run as runForkEffect } from '../effects/fork';
+import { JoinEffect, join, isJoinEffect, run as runJoinEffect } from '../effects/join';
+import { CancelEffect, isCancelEffect, run as runCancelEffect } from '../effects/cancel';
 
 import { RunningTask } from '../task/Task';
-import { Effects }  from './Effect'
 import { run } from './run';
-import { Process } from './Process';
 
-function* subProcess1(): Generator<Effects, string, unknown> {
+function* subProcess1() {
   yield* delay(2000);
 
   const message = 'hello world from subProcess 1';
@@ -18,7 +16,7 @@ function* subProcess1(): Generator<Effects, string, unknown> {
   return message
 }
 
-function* subProcess2(): Generator<Effects, string, unknown> {
+function* subProcess2() {
   yield* delay(1000);
 
   const message = 'hello world from subProcess 2';
@@ -27,7 +25,7 @@ function* subProcess2(): Generator<Effects, string, unknown> {
   return message
 }
 
-function* test(): Process {
+function* test() {
   const delayResult = yield* delay(1000);
   console.log({ delayResult });
 
@@ -73,46 +71,58 @@ function* test(): Process {
 
   console.log({ callResult: result });
 
-  const task1 = (yield* fork(subProcess1)) as RunningTask;
-  const task2 = (yield* fork(subProcess2)) as RunningTask;
+  // const task1 = (yield* fork(subProcess1)) as RunningTask;
+  // const task2 = (yield* fork(subProcess2)) as RunningTask;
 
-  yield* delay(100);
-  // yield* cancel([task1]);
+  // yield* delay(100);
+  // // yield* cancel([task1]);
 
-  console.log('icici');
+  // console.log('icici');
 
-  // yield* delay(10000);
+  // // yield* delay(10000);
 
-  try {
-    const tasksResult = yield* join([task1, task2]);
-    console.log('join done', { tasksResult });
-  } catch (error) {
-    console.error(error);
-  }
+  // try {
+  //   const tasksResult = yield* join([task1, task2]);
+  //   console.log('join done', { tasksResult });
+  // } catch (error) {
+  //   console.error(error);
+  // }
 }
 
 run([
   {
+    effect: {} as DelayEffect,
+    env: {},
     is: isDelayEffect,
     run: runDelayEffect,
   },
   {
+    effect: {} as CallEffect,
+    env: {},
     is: isCallEffect,
     run: runCallEffect,
   },
   {
+    effect: {} as ForkEffect,
+    env: {},
     is: isForkEffect,
     run: runForkEffect,
   },
   {
+    effect: {} as JoinEffect,
+    env: {},
     is: isJoinEffect,
     run: runJoinEffect,
   },
   {
+    effect: {} as CancelEffect,
+    env: {} as { toto: string },
     is: isCancelEffect,
     run: runCancelEffect,
   },
 ])(
-  {},
+  {
+    toto: 'hlle',
+  },
   test,
 );
