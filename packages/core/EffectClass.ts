@@ -52,7 +52,7 @@ export type EffectClass<E extends Effect, Env extends {}> = {
   run: EffectRunner<E, Env>;
 }
 
-export type AnyEffectClass = EffectClass<any, any>;
+export type AnyEffectClass = EffectClass<Effect, unknown>;
 
 export type EffectFromClass<C extends AnyEffectClass> = C['effect'];
 export type EffectFromClasses<Cs extends AnyEffectClass[]> = Cs[number]['effect'];

@@ -9,13 +9,15 @@ import {
   Context,
 } from './context';
 
-import { AnyEffectClass, EffectRunResult}   from './EffectClass';
+import { AnyEffectClass, EffectRunResult, EnvFromClasses } from './EffectClass';
 
 import { Effect } from './Effect';
 
-export function buildNextEffectRunner<Env extends {}>(
-  runners: AnyEffectClass[],
-  env: Env
+export function buildNextEffectRunner<
+  EffectClasses extends AnyEffectClass[],
+>(
+  runners: EffectClasses,
+  env: EnvFromClasses<EffectClasses>,
 ) {
   return function runNextEffect<Return>(
     context: Context,

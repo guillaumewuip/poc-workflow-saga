@@ -19,7 +19,7 @@ export function run<
   ) {
     const generator = process();
 
-    const runNextEffect = buildNextEffectRunner<EnvFromClasses<EffectClasses>>(runners, env);
+    const runNextEffect = buildNextEffectRunner(runners, env);
 
     const task = createTask();
     const context: Context = {
