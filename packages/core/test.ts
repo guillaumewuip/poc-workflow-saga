@@ -2,8 +2,9 @@ import { delay, isDelayEffect, run as runDelayEffect } from '../effects/delay';
 import { call, isCallEffect, run as runCallEffect } from '../effects/call';
 import { fork, isForkEffect, run as runForkEffect } from '../effects/fork';
 import { join, isJoinEffect, run as runJoinEffect } from '../effects/join';
-import { cancel, isCancelEffect, run as runCancelEffect } from '../effects/cancel';
+import { isCancelEffect, run as runCancelEffect } from '../effects/cancel';
 
+import { RunningTask } from '../task/Task';
 import { Effects }  from './Effect'
 import { run } from './run';
 import { Process } from './Process';
@@ -72,15 +73,15 @@ function* test(): Process {
 
   console.log({ callResult: result });
 
-  const task1 = yield* fork(subProcess1);
-  const task2 = yield* fork(subProcess2);
+  const task1 = (yield* fork(subProcess1)) as RunningTask;
+  const task2 = (yield* fork(subProcess2)) as RunningTask;
 
   yield* delay(100);
-  yield* cancel([task1]);
+  // yield* cancel([task1]);
 
   console.log('icici');
 
-  yield* delay(10000);
+  // yield* delay(10000);
 
   try {
     const tasksResult = yield* join([task1, task2]);
