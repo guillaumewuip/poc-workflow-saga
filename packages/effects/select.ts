@@ -78,7 +78,7 @@ export function* select<
 };
 
 
-export function createSelectStoreEffect<Env extends {}, Store>(
+export function createSelectStoreEffect<Env extends {}, Store extends { getState: () => any }>(
   storeGetter: (env: Env) => Store,
 ) {
   const storeEffectClass = createEffectClass<SelectEffect, Env>(isSelectEffect, run)
@@ -86,7 +86,7 @@ export function createSelectStoreEffect<Env extends {}, Store>(
   const select = function* select<Result>(
     selector: (store: Store) => Result,
   ) {
-    const result = yield create(storeGetter, selector);
+    const result = yield create((env) => storeGetter(env).getState(), selector);
 
     // we are sure this is a Result
     return result as Result;

@@ -4,15 +4,34 @@ import { fork, effectClass as forkEffectClass } from '../effects/fork';
 import { join, effectClass as joinEffectClass } from '../effects/join';
 import { cancel, effectClass as cancelEffectClass } from '../effects/cancel';
 import { select, effectClass as selectEffectClass, createSelectStoreEffect } from '../effects/select';
+import { createUpdateStoreEffect } from '../effects/update';
 
 import { RunningTask } from '../task/Task';
 import { run } from './run';
 
 type Store = {
-  messages: string[],
+  getState: () => string[],
+  updateState: (updater: (messages: string[]) => string[]) => void
 };
 
+const messages: string[] = ['hello'];
+
+const store: Store = {
+  getState() {
+    return messages; //
+  },
+
+  updateState(updater: (messages: string[]) => string[]) {
+    const newMessages = updater(messages);
+    messages.splice(0, messages.length, ...newMessages);
+  },
+}
+
 const selectEffect = createSelectStoreEffect(
+  ({ store }: { store: Store }) => store,
+);
+
+const updateEffect = createUpdateStoreEffect(
   ({ store }: { store: Store }) => store,
 );
 
@@ -42,11 +61,15 @@ function* test() {
 
   console.log('generic select', { valueFromGeneric });
 
-  const messages = yield* selectEffect.select(
-    (store) => store.messages,
+  yield* updateEffect.update(
+    (messages) => [...messages, 'world'],
   );
 
-  console.log('specialized select', { messages });
+  const messages = yield* selectEffect.select(
+    (messages) => messages,
+  );
+
+  console.log('specialized select after update', { messages });
 
   const delayResult = yield* delay(1000);
   console.log({ delayResult });
@@ -120,13 +143,12 @@ const effectClasses = [
   cancelEffectClass,
   selectEffectClass,
   selectEffect.effectClass,
+  updateEffect.effectClass,
 ];
 
 const program = run<typeof effectClasses>(test);
 
 program(effectClasses, {
   someStore: { value: 1234431 },
-  store: {
-    messages: ['hello', 'yoyoyo'],
-  }
+  store,
 });
