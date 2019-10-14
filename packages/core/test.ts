@@ -9,16 +9,17 @@ import { createUpdateStoreEffect } from '../effects/update';
 import { RunningTask } from '../task/Task';
 import { run } from './run';
 
+// ------------ fake store
+
 type Store = {
   getState: () => string[],
   updateState: (updater: (messages: string[]) => string[]) => void
 };
 
 const messages: string[] = ['hello'];
-
 const store: Store = {
   getState() {
-    return messages; //
+    return messages;
   },
 
   updateState(updater: (messages: string[]) => string[]) {
@@ -27,10 +28,16 @@ const store: Store = {
   },
 }
 
+// ------------
+
+// on crée des effets select / update spécialisé à un store qui se trouve sur la
+// clé "store" de l'environnement
+// Comme c'est quelque chose de super courant  ça vaudra le coup de déplacer ça
+// dans ../effects/{select,update}Store histoire que ce ça ne soit pas à l'app
+// de le faire
 const selectEffect = createSelectStoreEffect(
   ({ store }: { store: Store }) => store,
 );
-
 const updateEffect = createUpdateStoreEffect(
   ({ store }: { store: Store }) => store,
 );
