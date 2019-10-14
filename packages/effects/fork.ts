@@ -8,6 +8,7 @@ import {
 import {
   EffectRunResult,
   createEffectRunValue,
+  createEffectClass,
 } from '../core/EffectClass';
 
 import {
@@ -24,22 +25,16 @@ import { Context } from '../core/context';
 export const NAME: 'FORK' = 'FORK';
 
 export type ForkEffect = Effect<typeof NAME> & {
-  fn: (...args: any[]) => Generator<Effect, unknown, unknown>,
+  fn: (...args: any[]) => Generator<Effect<unknown>, unknown, unknown>,
   args: any[],
 };
 
-// declare module '../core/Effect' {
-//   interface EffectNameToEffect {
-//     Fork: ForkEffect;
-//   }
-// }
-
-export function isForkEffect(anyEffect: Effect): anyEffect is ForkEffect {
+function isForkEffect(anyEffect: Effect<unknown>): anyEffect is ForkEffect {
   return anyEffect._NAME === NAME;
 };
 
 function create<
-  Fn extends (...args: any[]) => Generator<Effect, unknown, unknown>
+  Fn extends (...args: any[]) => Generator<Effect<unknown>, unknown, unknown>
 >(fn: Fn, ...args: Parameters<Fn>): ForkEffect {
   return {
     _NAME: NAME,
@@ -48,7 +43,7 @@ function create<
   };
 }
 function runGenerator(
-  generator: Generator<Effect, unknown, unknown>,
+  generator: Generator<Effect<unknown>, unknown, unknown>,
   context: Context,
   task: Task<unknown>,
 ) {
@@ -70,9 +65,10 @@ function runGenerator(
   );
 }
 
-export function run(
+function run(
   effect: ForkEffect,
   context: Context,
+  _: unknown,
   next: (result: EffectRunResult) => void,
 ) {
   const {
@@ -119,10 +115,12 @@ export function run(
   }
 }
 
+export const effectClass = createEffectClass(isForkEffect, run);
+
 type GeneratorResult<G> = G extends Generator<any, infer U, any> ? U : any;
 
 export function* fork<
-  Fn extends (...args: any[]) => Generator<ForkEffect, unknown, unknown>
+  Fn extends (...args: any[]) => Generator<Effect<unknown>, unknown, unknown>
 >(fn: Fn, ...args: Parameters<Fn>) {
   const result = yield create(fn, ...args);
 

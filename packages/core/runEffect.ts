@@ -21,7 +21,7 @@ export function buildNextEffectRunner<
 ) {
   return function runNextEffect<Return>(
     context: Context,
-    generator: Generator<Effect, Return, unknown>,
+    generator: Generator<Effect<unknown>, Return, unknown>,
     effectResult: EffectRunResult,
     onDone: (result: Return) => void,
   ) {
@@ -53,7 +53,9 @@ export function buildNextEffectRunner<
       onDone(result.value);
     } else {
       const effect = result.value;
-      const maybeRunner = findFirst((effectClass: AnyEffectClass) => effectClass.is(effect))(runners);
+      const maybeRunner = findFirst(
+        (effectClass: AnyEffectClass) => effectClass.is(effect)
+      )(runners);
 
       pipe(
         maybeRunner,

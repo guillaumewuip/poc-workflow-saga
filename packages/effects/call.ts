@@ -5,6 +5,7 @@ import {
 } from '../core/Effect';
 
 import {
+  createEffectClass,
   EffectRunResult,
   createEffectRunValue,
   createEffectRunError,
@@ -16,7 +17,7 @@ const isPromise = (something: any): something is Promise<unknown> => {
   return something && typeof something.then === 'function';
 }
 
-const isGenerator = (something: any): something is Generator<Effect, unknown, unknown> => {
+const isGenerator = (something: any): something is Generator<Effect<unknown>, unknown, unknown> => {
   return something && typeof something.next === 'function' && typeof something.throw === 'function';
 };
 
@@ -27,13 +28,7 @@ export type CallEffect = Effect<typeof NAME> & {
   args: any[],
 };
 
-// declare module '../core/Effect' {
-//   interface EffectNameToEffect {
-//     Call: CallEffect;
-//   }
-// }
-
-export function isCallEffect(anyEffect: Effect): anyEffect is CallEffect {
+function isCallEffect(anyEffect: Effect<unknown>): anyEffect is CallEffect {
   return anyEffect._NAME === NAME;
 };
 
@@ -59,7 +54,7 @@ function runPromise(
 }
 
 function runGenerator(
-  generator: Generator<Effect, unknown, unknown>,
+  generator: Generator<Effect<unknown>, unknown, unknown>,
   context: Context,
   next: (result: EffectRunResult) => void,
 ) {
@@ -73,9 +68,15 @@ function runGenerator(
   );
 }
 
+export const effectClass = createEffectClass(
+  isCallEffect,
+  run,
+);
+
 export function run(
   effect: CallEffect,
   context: Context,
+  _: unknown,
   next: (result: EffectRunResult) => void,
 ) {
   const {

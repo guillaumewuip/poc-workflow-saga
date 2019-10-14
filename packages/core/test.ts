@@ -1,11 +1,20 @@
-import { DelayEffect, delay, isDelayEffect, run as runDelayEffect } from '../effects/delay';
-import { CallEffect, call, isCallEffect, run as runCallEffect } from '../effects/call';
-import { ForkEffect, fork, isForkEffect, run as runForkEffect } from '../effects/fork';
-import { JoinEffect, join, isJoinEffect, run as runJoinEffect } from '../effects/join';
-import { CancelEffect, isCancelEffect, run as runCancelEffect } from '../effects/cancel';
+import { delay, effectClass as delayEffectClass } from '../effects/delay';
+import { call, effectClass as callEffectClass } from '../effects/call';
+import { fork, effectClass as forkEffectClass } from '../effects/fork';
+import { join, effectClass as joinEffectClass } from '../effects/join';
+import { cancel, effectClass as cancelEffectClass } from '../effects/cancel';
+import { select, effectClass as selectEffectClass, createSelectStoreEffect } from '../effects/select';
 
 import { RunningTask } from '../task/Task';
 import { run } from './run';
+
+type Store = {
+  messages: string[],
+};
+
+const selectEffect = createSelectStoreEffect(
+  ({ store }: { store: Store }) => store,
+);
 
 function* subProcess1() {
   yield* delay(2000);
@@ -26,6 +35,19 @@ function* subProcess2() {
 }
 
 function* test() {
+  const valueFromGeneric = yield* select<{ someStore: { value: number }}, { value: number }, number>(
+    ({ someStore }) => someStore,
+    (store) => store.value,
+  );
+
+  console.log('generic select', { valueFromGeneric });
+
+  const messages = yield* selectEffect.select(
+    (store) => store.messages,
+  );
+
+  console.log('specialized select', { messages });
+
   const delayResult = yield* delay(1000);
   console.log({ delayResult });
 
@@ -71,58 +93,40 @@ function* test() {
 
   console.log({ callResult: result });
 
-  // const task1 = (yield* fork(subProcess1)) as RunningTask;
-  // const task2 = (yield* fork(subProcess2)) as RunningTask;
+  // TODO  do not use as RunningTask but fold on task
+  const task1 = (yield* fork(subProcess1)) as RunningTask;
+  const task2 = (yield* fork(subProcess2)) as RunningTask;
 
-  // yield* delay(100);
-  // // yield* cancel([task1]);
+  yield* delay(100);
+  yield* cancel([task1]);
 
-  // console.log('icici');
+  console.log('icici');
 
-  // // yield* delay(10000);
+  yield* delay(1000);
 
-  // try {
-  //   const tasksResult = yield* join([task1, task2]);
-  //   console.log('join done', { tasksResult });
-  // } catch (error) {
-  //   console.error(error);
-  // }
+  try {
+    const tasksResult = yield* join([task1, task2]);
+    console.log('join done', { tasksResult });
+  } catch (error) {
+    console.error(error);
+  }
 }
 
-run([
-  {
-    effect: {} as DelayEffect,
-    env: {},
-    is: isDelayEffect,
-    run: runDelayEffect,
-  },
-  {
-    effect: {} as CallEffect,
-    env: {},
-    is: isCallEffect,
-    run: runCallEffect,
-  },
-  {
-    effect: {} as ForkEffect,
-    env: {},
-    is: isForkEffect,
-    run: runForkEffect,
-  },
-  {
-    effect: {} as JoinEffect,
-    env: {},
-    is: isJoinEffect,
-    run: runJoinEffect,
-  },
-  {
-    effect: {} as CancelEffect,
-    env: {} as { toto: string },
-    is: isCancelEffect,
-    run: runCancelEffect,
-  },
-])(
-  {
-    toto: 'hlle',
-  },
-  test,
-);
+const effectClasses = [
+  delayEffectClass,
+  callEffectClass,
+  forkEffectClass,
+  joinEffectClass,
+  cancelEffectClass,
+  selectEffectClass,
+  selectEffect.effectClass,
+];
+
+const program = run<typeof effectClasses>(test);
+
+program(effectClasses, {
+  someStore: { value: 1234431 },
+  store: {
+    messages: ['hello', 'yoyoyo'],
+  }
+});

@@ -15,6 +15,7 @@ import {
   EffectRunResult,
   createEffectRunValue,
   createEffectRunError,
+  createEffectClass,
 } from '../core/EffectClass';
 
 import {
@@ -34,13 +35,7 @@ export type JoinEffect = Effect<typeof NAME> & {
   tasks: RunningOrDoneTask<unknown>[],
 };
 
-// declare module '../core/Effect' {
-//   interface EffectNameToEffect {
-//     Join: JoinEffect;
-//   }
-// }
-
-export function isJoinEffect(anyEffect: Effect): anyEffect is JoinEffect {
+function isJoinEffect(anyEffect: Effect<unknown>): anyEffect is JoinEffect {
   return anyEffect._NAME === NAME;
 };
 
@@ -51,9 +46,10 @@ function create(tasks: RunningOrDoneTask<unknown>[]): JoinEffect {
   };
 }
 
-export function run(
+function run(
   effect: JoinEffect,
   _: Context,
+  __: unknown,
   next: (result: EffectRunResult) => void,
 ) {
   const {
@@ -156,6 +152,8 @@ export function run(
 
   console.log('join process started');
 }
+
+export const effectClass = createEffectClass(isJoinEffect, run);
 
 type RunningOrDoneTask<A> = RunningTask | DoneTask<A>;
 

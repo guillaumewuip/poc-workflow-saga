@@ -7,7 +7,7 @@ import {
 
 export type RunEffect = <R>(
   context: Context,
-  generator: Generator<Effect, R, unknown>,
+  generator: Generator<Effect<unknown>, R, unknown>,
   effectResult: EffectRunResult,
   onDone: (result: R) => void,
 ) => void;

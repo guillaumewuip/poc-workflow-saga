@@ -38,24 +38,53 @@ export function createEffectRunValue(value: any): EffectRunResult {
   });
 }
 
-export type EffectRunner<E extends Effect, Env extends {}> = (
+export type EffectFilter<
+  E extends Effect<unknown>,
+> = (effect: Effect<unknown>) => effect is E;
+
+export type EffectRunner<
+  E extends Effect<unknown>,
+  Env extends {},
+> = (
   effect: E,
   context: Context,
   env: Env,
   next: (result: EffectRunResult) => void
 ) => void;
 
-export type EffectClass<E extends Effect, Env extends {}> = {
-  effect: E,
-  env: Env,
-  is: (effect: Effect) => effect is E;
+export type EffectClass<
+  E extends Effect<unknown>,
+  Env,
+> = {
+  is: EffectFilter<E>;
   run: EffectRunner<E, Env>;
 }
 
-export type AnyEffectClass = EffectClass<Effect, unknown>;
+export function createEffectClass<
+  E extends Effect<unknown>,
+  Env extends {},
+>(
+  is: EffectFilter<E>,
+  run: EffectRunner<E, Env>
+): EffectClass<E, Env> {
+  return {
+    is,
+    run,
+  };
+}
 
-export type EffectFromClass<C extends AnyEffectClass> = C['effect'];
-export type EffectFromClasses<Cs extends AnyEffectClass[]> = Cs[number]['effect'];
+export type AnyEffectClass = {
+  is: (effect: Effect<unknown>) => boolean;
+  run: (
+    effect: any,
+    context: Context,
+    env: any,
+    next: (result: EffectRunResult) => void
+  ) => void
+};
 
-export type EnvFromClass<C extends AnyEffectClass> = C['env'];
-export type EnvFromClasses<Cs extends AnyEffectClass[]> = UnionToIntersection<Cs[number]['env']>;
+export type EffectFromClass<C> = C extends EffectClass<infer E, any> ? E : never;
+export type EffectFromClasses<Cs extends readonly AnyEffectClass[]> = EffectFromClass<Cs[number]>;
+
+export type EnvFromClass<C> = C extends EffectClass<any, infer Env> ? Env: never;
+export type EnvFromClasses<Cs extends readonly AnyEffectClass[]> = UnionToIntersection<EnvFromClass<Cs[number]>>;

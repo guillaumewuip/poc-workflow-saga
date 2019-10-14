@@ -1,6 +1,7 @@
 import {
   EffectRunResult,
   createEffectRunValue,
+  createEffectClass,
 } from '../core/EffectClass';
 
 import {
@@ -17,13 +18,7 @@ export type DelayEffect = Effect<typeof NAME> & {
   readonly delay: number;
 }
 
-// declare module '../core/Effect' {
-//   interface EffectNameToEffect {
-//     Delay: DelayEffect;
-//   }
-// }
-
-export function isDelayEffect(anyEffect: Effect): anyEffect is DelayEffect {
+function isDelayEffect(anyEffect: Effect<unknown>): anyEffect is DelayEffect {
   return anyEffect._NAME === NAME;
 };
 
@@ -34,9 +29,10 @@ function create(ms: number): DelayEffect {
   };
 }
 
-export function run(
+function run(
   effect: DelayEffect,
   _: Context,
+  __: unknown,
   next: (result: EffectRunResult) => void,
 ) {
   if (!isDelayEffect(effect)) {
@@ -51,6 +47,8 @@ export function run(
     next(createEffectRunValue(ms));
   }, ms);
 }
+
+export const effectClass = createEffectClass(isDelayEffect, run);
 
 export function* delay(ms: number) {
   const result = yield create(ms);
