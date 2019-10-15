@@ -33,11 +33,7 @@ export function createUnicastChannel<Event>(): Channel<Event> {
   const subscribe = (subscription: Subscription) => {
     subscriptions = snoc(subscriptions, subscription);
 
-    console.log({ subscriptions });
-
     const maybeEvent = head(buffer);
-
-    console.log({ maybeEvent });
 
     // ugly but for now we need to return the unsubscribe method before calling
     // the subscription

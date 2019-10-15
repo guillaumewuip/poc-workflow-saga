@@ -32,7 +32,6 @@ export function buildNextEffectRunner<
 
     // if current task is cancelled or aborted
     if (isCancelled(currentTask) || isAborted(currentTask)) {
-      console.log('cancelled', { currentTask });
       // this will jump in the finaly block of the generator
       if (generator.return) {
         generator.return({} as Return);

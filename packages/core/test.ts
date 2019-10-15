@@ -7,6 +7,7 @@ import { select, effectClass as selectEffectClass, createSelectStoreEffect } fro
 import { createUpdateStoreEffect } from '../effects/update';
 import { takeChannel, effectClass as takeChannelEffectClass } from '../effects/takeChannel';
 import { putChannel, effectClass as putChannelEffectClass } from '../effects/putChannel';
+import { createTakeEffect } from '../effects/take';
 
 import { createUnicastChannel } from '../channel/Channel';
 import { RunningTask } from '../task/Task';
@@ -44,6 +45,8 @@ const selectEffect = createSelectStoreEffect(
 const updateEffect = createUpdateStoreEffect(
   ({ store }: { store: Store }) => store,
 );
+
+const takeEffect = createTakeEffect<{ type: string }>();
 
 function* subProcess1() {
   yield* delay(2000);
@@ -151,6 +154,10 @@ function* test() {
   const channelOutpout = yield* takeChannel(channel);
 
   console.log({ channelOutpout });
+
+  const takeFromEnvChannelResult = yield* takeEffect.take();
+
+  console.log({ takeFromEnvChannelResult });
 }
 
 const effectClasses = [
@@ -164,11 +171,16 @@ const effectClasses = [
   updateEffect.effectClass,
   takeChannelEffectClass,
   putChannelEffectClass,
+  takeEffect.effectClass,
 ];
 
 const program = run<typeof effectClasses>(test);
 
+const channel = createUnicastChannel();
+channel.put({ type: 'test' });
+
 program(effectClasses, {
   someStore: { value: 1234431 },
   store,
+  channel
 });
