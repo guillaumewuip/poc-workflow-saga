@@ -33,18 +33,27 @@ export function createUnicastChannel<Event>(): Channel<Event> {
   const subscribe = (subscription: Subscription) => {
     subscriptions = snoc(subscriptions, subscription);
 
+    console.log({ subscriptions });
+
     const maybeEvent = head(buffer);
 
-    pipe(
-      maybeEvent,
-      fold(
-        () => {},
-        (event) => {
-          buffer = unsafeDeleteAt(0, buffer)
-          subscription(event);
-        }
-      ),
-    );
+    console.log({ maybeEvent });
+
+    // ugly but for now we need to return the unsubscribe method before calling
+    // the subscription
+    // TODO make better
+    setTimeout(() => {
+      pipe(
+        maybeEvent,
+        fold(
+          () => {},
+          (event) => {
+            buffer = unsafeDeleteAt(0, buffer)
+            subscription(event);
+          }
+        ),
+      );
+    }, 0);
 
     return () => {
       const maybeIndex = findIndex((s: Subscription) => s === subscription)(subscriptions);

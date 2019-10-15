@@ -5,7 +5,10 @@ import { join, effectClass as joinEffectClass } from '../effects/join';
 import { cancel, effectClass as cancelEffectClass } from '../effects/cancel';
 import { select, effectClass as selectEffectClass, createSelectStoreEffect } from '../effects/select';
 import { createUpdateStoreEffect } from '../effects/update';
+import { takeChannel, effectClass as takeChannelEffectClass } from '../effects/takeChannel';
+import { putChannel, effectClass as putChannelEffectClass } from '../effects/putChannel';
 
+import { createUnicastChannel } from '../channel/Channel';
 import { RunningTask } from '../task/Task';
 import { run } from './run';
 
@@ -140,6 +143,14 @@ function* test() {
   } catch (error) {
     console.error(error);
   }
+
+  const channel = createUnicastChannel<string>();
+
+  yield* putChannel('hello channel', channel);
+
+  const channelOutpout = yield* takeChannel(channel);
+
+  console.log({ channelOutpout });
 }
 
 const effectClasses = [
@@ -151,6 +162,8 @@ const effectClasses = [
   selectEffectClass,
   selectEffect.effectClass,
   updateEffect.effectClass,
+  takeChannelEffectClass,
+  putChannelEffectClass,
 ];
 
 const program = run<typeof effectClasses>(test);
